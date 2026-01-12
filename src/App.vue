@@ -1,18 +1,60 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+  <div class="content">
+    <LayoutHeader>
+      <BlockSelectedItems
+        :selected="selectedItems"
+        :count="MAX_SELECTED_ITEMS"
+      />
+      <BlockSelectedItem :item="selectedItem" />
+    </LayoutHeader>
+    <LayoutMain>
+      <ContainerItems :data="DATA_USER" @on-click-item="onClickUserItem" />
+      <ContainerItems :data="DATA_SHOP" @on-click-item="onClickShopItem" />
+    </LayoutMain>
+  </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+<script lang="ts" setup>
+import { ref, reactive } from 'vue'
+import type { Ref, Reactive } from 'vue'
+import { IItem, TItems } from '@/types'
 
-export default defineComponent({
-  name: 'App',
-  components: {
-    HelloWorld
+import {
+  LayoutHeader,
+  LayoutMain,
+  BlockSelectedItems,
+  BlockSelectedItem,
+  ContainerItems,
+} from './components/'
+
+import { dataUserItems, dataShopItems } from './data'
+
+// Статичные данные, которые не могут меняться
+const DATA_USER = dataUserItems
+const DATA_SHOP = dataShopItems
+// Все числовые константы лучше выносить в отдельную переменную
+const MAX_SELECTED_ITEMS = 6
+
+// Массив выбранных вещей
+const selectedItems: Reactive<TItems> = reactive([])
+
+function onClickUserItem(value: IItem) {
+  const valueIndex = selectedItems.findIndex((item) => item.id === value.id)
+
+  // аналог valueIndex !== -1
+  if (~valueIndex) {
+    selectedItems.splice(valueIndex, 1)
+  } else if (selectedItems.length < MAX_SELECTED_ITEMS) {
+    selectedItems.push(value)
   }
-});
+}
+
+// Конкретная выбранная вещь
+const selectedItem: Ref<IItem | null> = ref(null)
+
+function onClickShopItem(value: IItem) {
+  selectedItem.value = value
+}
 </script>
 
 <style lang="scss">
@@ -22,6 +64,16 @@ export default defineComponent({
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  height: calc(100vh - 48px);
+  padding: 16px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  max-width: 1000px;
+  margin: 0 auto;
+  height: 100%;
+  gap: 20px;
 }
 </style>
